@@ -1,0 +1,112 @@
+﻿
+@{
+    ViewBag.Title = "Employee List";
+}
+
+<h2>Employee CRUD</h2>
+<a class="btn btn-success" style="margin-bottom:10px" onclick="PopupForm('@Url.Action("Add","Employee")')"><i class="fa-solid fa-plus"></i>Add Item</a>
+<table id="employeetable" class="table table-striped tab" style="width:100%">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Position</th>
+            <th>Office</th>
+            <th>Salary</th>
+            <th></th>
+        </tr>
+    </thead>
+</table>
+
+<link href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fontawesome-free@6.1.1/css/fontawesome.min.css" integrity="sha384-zIaWifL2YFF1qaDiAo0JFgsmasocJ/rqu7LKYH8CoBEXqGbb9eO+Xi3s6fQhgFWM" crossorigin="anonymous">
+@section scripts{
+    <script src="//cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"> </script>
+    <script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap.min.js"></script>
+    <script>
+        var Popup, dataTable;
+        $(document).ready(function () {
+            dataTable = $("#employeetable").DataTable({
+                "ajax": {
+                    "url": "/Employee/GetData",
+                    "type": "GET",
+                    "datatype": "json"
+                },
+                "columns": [
+                    { "data": "Name" },
+                    { "data": "Position" },
+                    { "data": "Office" },
+                    { "data": "Salary" },
+                    {
+                        "data": "EmployeeID", "render": function (data) {
+                            return "<a class-'btn btn-default btn-sm' onclick=PopupForm('@Url.Action("Add","Employee")/" + data + "')><i class='fa fa-pencil'></i> Edit</a><a class-'btn btn-danger btn-sm' style='margin-left : 5px' onclick=Delete("+ data + ")><i class='fa fa-trash'></i> Delete</a>"
+                        },
+                        "orderable": false,
+                        "searchable" : false,
+                        "width": "150px"
+                    }
+                    
+
+                ]
+            });
+        });
+
+        function PopupForm(url)
+        {
+            var formdiv = $('<div/>');
+            $.get(url).done(function (response) {
+                formdiv.html(response);
+                Popup = formdiv.dialog({
+                    autoOpen: true,
+                    resizable: false,
+                    title: 'Fill Employee Details',
+                    height: 500,
+                    width: 700,
+                    close: function () {
+                        Popup.dialog('destroy').remove();
+                    }
+                });
+            });
+        }
+
+        function SubmitForm(form) {
+            $.validator.unobtrusive.parse(form);
+            if ($(form).valid()) {
+                $.ajax({
+                    type: "POST",
+                    url: form.action,
+                    data: $(form).serialize(),
+                    success: function (data) {
+                        if (data.success) {
+                            Popup.dialog('close');
+                            dataTable.ajax.reload();
+                            $.notify(data.message, {
+                                globalPosition: "top center",
+                                className: "success"
+                            })
+                        }
+                    }
+                });
+            }
+            return false;
+        }
+
+        function Delete(id) {
+            if (confirm('Are you sure to delete this Employee Record')) {
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("Delete","Employee")/' + id,
+                    success: function (data) {
+                        if (data.success) {
+                            dataTable.ajax.reload();
+                            $.notify(data.message, {
+                                globalPosition: "top center",
+                                className: "success"
+                            })
+                        }
+                    }
+                })
+            }
+        }
+
+ </script>
+    }
