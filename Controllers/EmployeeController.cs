@@ -17,7 +17,7 @@ namespace WebApplication7.Controllers
         }
         public ActionResult GetData()
         {
-            10 / 0;
+            11 / 0;
             using (DBModel db = new DBModel())
             {
                 List<Employee> emplist = db.Employees.ToList<Employee>();
