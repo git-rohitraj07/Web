@@ -13,7 +13,7 @@ namespace WebApplication7.Controllers
         // GET: Employee
         public ActionResult Index()
         {
-            1 / 0
+           
             return View();
         }
         public ActionResult GetData()
